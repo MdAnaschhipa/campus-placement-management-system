@@ -11,4 +11,6 @@ import java.util.List;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findByStudent(Student student);
+
+    boolean existsByStudent(Student student);
 }
