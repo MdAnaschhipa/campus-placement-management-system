@@ -1,14 +1,15 @@
 package com.campusplacement.service.impl;
 
-import org.springframework.security.core.Authentication;
 import com.campusplacement.dto.request.StudentProfileRequest;
 import com.campusplacement.dto.response.StudentProfileResponse;
 import com.campusplacement.entity.Student;
 import com.campusplacement.entity.User;
 import com.campusplacement.repository.StudentRepository;
 import com.campusplacement.repository.UserRepository;
+import com.campusplacement.service.ProfileCompletionService;
 import com.campusplacement.service.StudentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +21,12 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
+    private final ProfileCompletionService profileCompletionService;
 
     @Override
     @Transactional(readOnly = true)
     public StudentProfileResponse getProfile() {
+
         User user = getCurrentUser();
 
         Student student = studentRepository.findByUser(user)
@@ -36,6 +39,7 @@ public class StudentServiceImpl implements StudentService {
     public StudentProfileResponse createProfile(StudentProfileRequest request) {
 
         User user = getCurrentUser();
+
         if (request.getSemester() != null
                 && (request.getSemester() < 1 || request.getSemester() > 8)) {
             throw new RuntimeException("Semester must be between 1 and 8");
@@ -63,11 +67,9 @@ public class StudentServiceImpl implements StudentService {
                 .resumeUrl(request.getResumeUrl())
                 .build();
 
-        student.setProfileCompletionPercentage(
-                calculateProfileCompletionFromEntity(student)
-        );
-
         Student savedStudent = studentRepository.save(student);
+
+        savedStudent = profileCompletionService.updateCompletion(savedStudent);
 
         return mapToResponse(savedStudent);
     }
@@ -76,6 +78,7 @@ public class StudentServiceImpl implements StudentService {
     public StudentProfileResponse updateProfile(StudentProfileRequest request) {
 
         User user = getCurrentUser();
+
         if (request.getSemester() != null
                 && (request.getSemester() < 1 || request.getSemester() > 8)) {
             throw new RuntimeException("Semester must be between 1 and 8");
@@ -83,7 +86,6 @@ public class StudentServiceImpl implements StudentService {
 
         Student student = studentRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Student profile not found"));
-
 
         if (request.getEnrollmentNumber() != null
                 && !request.getEnrollmentNumber().equals(student.getEnrollmentNumber())
@@ -127,13 +129,9 @@ public class StudentServiceImpl implements StudentService {
             student.setResumeUrl(request.getResumeUrl());
         }
 
-        student.setProfileCompletionPercentage(
-                calculateProfileCompletionFromEntity(student)
-        );
+        student = profileCompletionService.updateCompletion(student);
 
-        Student updatedStudent = studentRepository.save(student);
-
-        return mapToResponse(updatedStudent);
+        return mapToResponse(student);
     }
 
     private User getCurrentUser() {
@@ -155,24 +153,6 @@ public class StudentServiceImpl implements StudentService {
                                 "Authenticated user not found: " + email
                         )
                 );
-    }
-
-    private int calculateProfileCompletionFromEntity(Student student) {
-
-        int completed = 0;
-        int total = 9;
-
-        if (student.getEnrollmentNumber() != null && !student.getEnrollmentNumber().isBlank()) completed++;
-        if (student.getBranch() != null && !student.getBranch().isBlank()) completed++;
-        if (student.getSemester() != null) completed++;
-        if (student.getPhoneNumber() != null && !student.getPhoneNumber().isBlank()) completed++;
-        if (student.getDateOfBirth() != null) completed++;
-        if (student.getGender() != null && !student.getGender().isBlank()) completed++;
-        if (student.getAddress() != null && !student.getAddress().isBlank()) completed++;
-        if (student.getProfilePhotoUrl() != null && !student.getProfilePhotoUrl().isBlank()) completed++;
-        if (student.getResumeUrl() != null && !student.getResumeUrl().isBlank()) completed++;
-
-        return (completed * 100) / total;
     }
 
     private StudentProfileResponse mapToResponse(Student student) {

@@ -8,6 +8,7 @@ import com.campusplacement.entity.User;
 import com.campusplacement.repository.SkillRepository;
 import com.campusplacement.repository.StudentRepository;
 import com.campusplacement.repository.UserRepository;
+import com.campusplacement.service.ProfileCompletionService;
 import com.campusplacement.service.SkillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -25,6 +26,7 @@ public class SkillServiceImpl implements SkillService {
     private final SkillRepository skillRepository;
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
+    private final ProfileCompletionService profileCompletionService;
 
     @Override
     public SkillResponse addSkill(SkillRequest request) {
@@ -45,6 +47,8 @@ public class SkillServiceImpl implements SkillService {
                 .build();
 
         Skill savedSkill = skillRepository.save(skill);
+
+        profileCompletionService.updateCompletion(student);
 
         return toResponse(savedSkill);
     }
@@ -82,6 +86,8 @@ public class SkillServiceImpl implements SkillService {
 
         Skill updatedSkill = skillRepository.save(skill);
 
+        profileCompletionService.updateCompletion(student);
+
         return toResponse(updatedSkill);
     }
 
@@ -93,6 +99,8 @@ public class SkillServiceImpl implements SkillService {
         Skill skill = resolveOwnedSkill(skillId, student);
 
         skillRepository.delete(skill);
+
+        profileCompletionService.updateCompletion(student);
     }
 
     private Student resolveCurrentStudent() {
