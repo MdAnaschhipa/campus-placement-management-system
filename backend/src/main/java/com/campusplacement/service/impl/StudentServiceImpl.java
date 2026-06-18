@@ -2,8 +2,10 @@ package com.campusplacement.service.impl;
 
 import com.campusplacement.dto.request.StudentProfileRequest;
 import com.campusplacement.dto.response.StudentProfileResponse;
+import com.campusplacement.entity.Branch;
 import com.campusplacement.entity.Student;
 import com.campusplacement.entity.User;
+import com.campusplacement.repository.BranchRepository;
 import com.campusplacement.repository.StudentRepository;
 import com.campusplacement.repository.UserRepository;
 import com.campusplacement.service.ProfileCompletionService;
@@ -21,6 +23,7 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
+    private final BranchRepository branchRepository;
     private final ProfileCompletionService profileCompletionService;
 
     @Override
@@ -57,13 +60,17 @@ public class StudentServiceImpl implements StudentService {
         Student student = Student.builder()
                 .user(user)
                 .enrollmentNumber(request.getEnrollmentNumber())
-                .branch(request.getBranch())
+                .branch(getBranch(request.getBranchId()))
                 .semester(request.getSemester())
+                .cgpa(request.getCgpa())
+                .backlogs(request.getBacklogs())
                 .phoneNumber(request.getPhoneNumber())
                 .dateOfBirth(request.getDateOfBirth())
                 .gender(request.getGender())
                 .address(request.getAddress())
                 .profilePhotoUrl(request.getProfilePhotoUrl())
+                .linkedinUrl(request.getLinkedinUrl())
+                .githubUrl(request.getGithubUrl())
                 .resumeUrl(request.getResumeUrl())
                 .build();
 
@@ -97,12 +104,20 @@ public class StudentServiceImpl implements StudentService {
             student.setEnrollmentNumber(request.getEnrollmentNumber());
         }
 
-        if (request.getBranch() != null) {
-            student.setBranch(request.getBranch());
+        if (request.getBranchId() != null) {
+            student.setBranch(getBranch(request.getBranchId()));
         }
 
         if (request.getSemester() != null) {
             student.setSemester(request.getSemester());
+        }
+
+        if (request.getCgpa() != null) {
+            student.setCgpa(request.getCgpa());
+        }
+
+        if (request.getBacklogs() != null) {
+            student.setBacklogs(request.getBacklogs());
         }
 
         if (request.getPhoneNumber() != null) {
@@ -125,6 +140,14 @@ public class StudentServiceImpl implements StudentService {
             student.setProfilePhotoUrl(request.getProfilePhotoUrl());
         }
 
+        if (request.getLinkedinUrl() != null) {
+            student.setLinkedinUrl(request.getLinkedinUrl());
+        }
+
+        if (request.getGithubUrl() != null) {
+            student.setGithubUrl(request.getGithubUrl());
+        }
+
         if (request.getResumeUrl() != null) {
             student.setResumeUrl(request.getResumeUrl());
         }
@@ -132,6 +155,16 @@ public class StudentServiceImpl implements StudentService {
         student = profileCompletionService.updateCompletion(student);
 
         return mapToResponse(student);
+    }
+
+    private Branch getBranch(Long branchId) {
+
+        return branchRepository.findById(branchId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Branch not found with id: " + branchId
+                        )
+                );
     }
 
     private User getCurrentUser() {
@@ -162,13 +195,18 @@ public class StudentServiceImpl implements StudentService {
                 .fullName(student.getUser().getFullName())
                 .email(student.getUser().getEmail())
                 .enrollmentNumber(student.getEnrollmentNumber())
-                .branch(student.getBranch())
+                .branchId(student.getBranch().getId())
+                .branchName(student.getBranch().getBranchName())
                 .semester(student.getSemester())
+                .cgpa(student.getCgpa())
+                .backlogs(student.getBacklogs())
                 .phoneNumber(student.getPhoneNumber())
                 .dateOfBirth(student.getDateOfBirth())
                 .gender(student.getGender())
                 .address(student.getAddress())
                 .profilePhotoUrl(student.getProfilePhotoUrl())
+                .linkedinUrl(student.getLinkedinUrl())
+                .githubUrl(student.getGithubUrl())
                 .resumeUrl(student.getResumeUrl())
                 .profileCompletionPercentage(student.getProfileCompletionPercentage())
                 .createdAt(student.getCreatedAt())

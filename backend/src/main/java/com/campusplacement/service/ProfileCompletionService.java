@@ -69,7 +69,7 @@ public class ProfileCompletionService {
 
         if (isPresent(student.getPhoneNumber())) completedFields++;
         if (student.getDateOfBirth() != null) completedFields++;
-        if (isPresent(student.getGender())) completedFields++;
+        if (student.getGender() != null) completedFields++;
         if (isPresent(student.getAddress())) completedFields++;
         if (isPresent(student.getProfilePhotoUrl())) completedFields++;
 
@@ -81,7 +81,7 @@ public class ProfileCompletionService {
         int completedFields = 0;
 
         if (isPresent(student.getEnrollmentNumber())) completedFields++;
-        if (isPresent(student.getBranch())) completedFields++;
+        if (student.getBranch() != null) completedFields++;
         if (student.getSemester() != null) completedFields++;
 
         return (ACADEMIC_INFO_WEIGHT / ACADEMIC_INFO_FIELDS) * completedFields;
@@ -91,7 +91,7 @@ public class ProfileCompletionService {
 
         return isPresent(student.getPhoneNumber())
                 && student.getDateOfBirth() != null
-                && isPresent(student.getGender())
+                && student.getGender() != null
                 && isPresent(student.getAddress())
                 && isPresent(student.getProfilePhotoUrl());
     }
@@ -99,7 +99,7 @@ public class ProfileCompletionService {
     private boolean isAcademicInfoComplete(Student student) {
 
         return isPresent(student.getEnrollmentNumber())
-                && isPresent(student.getBranch())
+                && student.getBranch() != null
                 && student.getSemester() != null;
     }
 

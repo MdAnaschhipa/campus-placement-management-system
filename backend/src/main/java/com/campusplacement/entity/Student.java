@@ -1,11 +1,13 @@
 package com.campusplacement.entity;
 
+import com.campusplacement.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -30,10 +32,18 @@ public class Student {
     @Column(name = "enrollment_number", unique = true, length = 50)
     private String enrollmentNumber;
 
-    @Column(length = 100)
-    private String branch;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id", nullable = false)
+    private Branch branch;
 
     private Integer semester;
+
+    @Column(name = "cgpa", precision = 4, scale = 2)
+    private BigDecimal cgpa;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer backlogs = 0;
 
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
@@ -41,14 +51,21 @@ public class Student {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 30)
-    private String gender;
+    private Gender gender;
 
     @Column(length = 300)
     private String address;
 
     @Column(name = "profile_photo_url")
     private String profilePhotoUrl;
+
+    @Column(name = "linkedin_url")
+    private String linkedinUrl;
+
+    @Column(name = "github_url")
+    private String githubUrl;
 
     @Column(name = "resume_url")
     private String resumeUrl;
