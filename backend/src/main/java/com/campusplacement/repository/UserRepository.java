@@ -1,6 +1,6 @@
 package com.campusplacement.repository;
 
-import com.campusplacement.entity.Role;
+import com.campusplacement.enums.Role;
 import com.campusplacement.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

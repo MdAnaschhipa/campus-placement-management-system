@@ -1,6 +1,6 @@
 package com.campusplacement.dto;
 
-import com.campusplacement.entity.Role;
+import com.campusplacement.enums.Role;
 import lombok.*;
 
 @Getter

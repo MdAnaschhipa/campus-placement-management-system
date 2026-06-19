@@ -3,7 +3,7 @@ package com.campusplacement.service;
 import com.campusplacement.dto.AuthRequest;
 import com.campusplacement.dto.RegisterRequest;
 import com.campusplacement.dto.AuthResponse;
-import com.campusplacement.entity.Role;
+import com.campusplacement.enums.Role;
 import com.campusplacement.entity.User;
 import com.campusplacement.repository.UserRepository;
 import com.campusplacement.security.JwtService;
