@@ -1,6 +1,10 @@
 package com.campusplacement.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -16,4 +20,10 @@ public class RecruiterDashboardResponse {
     private Long closedJobs;
 
     private Long totalApplications;
+
+    private Long selectedCandidates;
+
+    private Long rejectedCandidates;
+
+    private Long scheduledInterviews;
 }
