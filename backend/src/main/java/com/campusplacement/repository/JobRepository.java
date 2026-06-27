@@ -18,6 +18,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             JobStatus jobStatus
     );
 
+    long countByJobStatus(
+            JobStatus jobStatus
+    );
+
     long countByRecruiterId(
             Long recruiterId
     );

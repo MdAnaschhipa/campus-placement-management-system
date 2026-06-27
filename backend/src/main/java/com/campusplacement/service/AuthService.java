@@ -15,6 +15,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.campusplacement.dto.request.ForgotPasswordRequest;
+import com.campusplacement.dto.request.ResetPasswordRequest;
+import com.campusplacement.entity.PasswordResetToken;
+import com.campusplacement.repository.PasswordResetTokenRepository;
+import com.campusplacement.service.EmailService;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +32,94 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailService emailService;
+
+    @Transactional
+    public void forgotPassword(
+            ForgotPasswordRequest request
+    ) {
+
+        User user = userRepository.findByEmail(
+                        request.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "User not found"));
+
+        passwordResetTokenRepository
+                .findByUser(user)
+                .ifPresent(existing ->
+                        passwordResetTokenRepository
+                                .delete(existing));
+
+        String token = UUID.randomUUID().toString();
+
+        PasswordResetToken resetToken =
+                PasswordResetToken.builder()
+                        .token(token)
+                        .user(user)
+                        .expiryDate(
+                                LocalDateTime.now()
+                                        .plusMinutes(15)
+                        )
+                        .build();
+
+        passwordResetTokenRepository
+                .save(resetToken);
+
+        String resetLink =
+                "http://localhost:5173/reset-password?token="
+                        + token;
+
+        emailService.sendPasswordResetEmail(
+                user.getEmail(),
+                resetLink
+        );
+    }
+    @Transactional
+    public void resetPassword(
+            ResetPasswordRequest request
+    ) {
+
+        PasswordResetToken resetToken =
+                passwordResetTokenRepository
+                        .findByToken(
+                                request.getToken()
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Invalid reset token"));
+
+        if (resetToken.getExpiryDate()
+                .isBefore(
+                        LocalDateTime.now())) {
+
+            passwordResetTokenRepository
+                    .delete(resetToken);
+
+            throw new RuntimeException(
+                    "Reset token expired");
+        }
+
+        User user = resetToken.getUser();
+
+        user.setPassword(
+                passwordEncoder.encode(
+                        request.getNewPassword()
+                )
+        );
+
+        userRepository.save(user);
+
+        passwordResetTokenRepository
+                .delete(resetToken);
+    }
+
+
+
+
+
+
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {

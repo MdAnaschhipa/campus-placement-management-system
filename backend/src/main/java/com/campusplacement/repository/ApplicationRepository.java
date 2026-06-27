@@ -10,6 +10,15 @@ import java.util.List;
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
 
+    long countByStudentId(
+            Long studentId
+    );
+
+    long countByStudentIdAndApplicationStatus(
+            Long studentId,
+            ApplicationStatus applicationStatus
+    );
+
     boolean existsByStudentIdAndJobId(
             Long studentId,
             Long jobId
